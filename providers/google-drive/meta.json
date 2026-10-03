@@ -1,0 +1,4 @@
+{
+  "description": "Resolves public Google Drive file and folder links to direct downloads (handles the virus-scan confirm page).",
+  "authors": ["ps4-providers-template"]
+}

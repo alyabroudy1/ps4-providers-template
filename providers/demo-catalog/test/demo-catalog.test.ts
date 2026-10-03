@@ -4,7 +4,7 @@ import { installFakeBridge, type FakeBridge } from "../../../testing/fakeBridge"
 import { validateCards, validateDetails, validateHome, validateManifest } from "../../../testing/validate";
 import * as provider from "../src/index";
 
-const CATALOG_URL = "https://raw.githubusercontent.com/YOUR_USER/ps4-providers-template/main/demo/catalog.json";
+const CATALOG_URL = "https://raw.githubusercontent.com/alyabroudy1/ps4-providers-template/main/demo/catalog.json";
 const fixture = readFileSync(new URL("./fixtures/catalog.json", import.meta.url), "utf8");
 
 let bridge: FakeBridge;

@@ -29,7 +29,7 @@ const arg = (name) => {
   return i >= 0 ? argv[i + 1] : undefined;
 };
 
-const PLACEHOLDER_BASE = "https://raw.githubusercontent.com/YOUR_USER/ps4-providers-template/builds";
+const PLACEHOLDER_BASE = "https://raw.githubusercontent.com/alyabroudy1/ps4-providers-template/builds";
 let base = arg("--base") ?? process.env.REPO_RAW_BASE;
 if (!base) {
   console.warn(`warning: no --base / REPO_RAW_BASE given, using placeholder ${PLACEHOLDER_BASE}`);
@@ -65,6 +65,10 @@ const providersDir = join(root, "providers");
 const ids = readdirSync(providersDir)
   .filter((d) => statSync(join(providersDir, d)).isDirectory() && existsSync(join(providersDir, d, "src", "index.ts")))
   .sort();
+// Listing order in plugins.json: repo.config.json "providerOrder" first (in that order), the rest alphabetically.
+const order = Array.isArray(config.providerOrder) ? config.providerOrder : [];
+const rank = (id) => (order.indexOf(id) >= 0 ? order.indexOf(id) : order.length);
+ids.sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
 if (ids.length === 0) throw new Error("no providers found in providers/*/src/index.ts");
 
 rmSync(outDir, { recursive: true, force: true });

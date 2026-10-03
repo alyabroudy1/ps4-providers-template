@@ -1,5 +1,6 @@
 {
   "name": "PS4 Toolkit demo providers",
-  "description": "Content-neutral sample providers (demo catalog + GitHub Releases extractor).",
-  "minAppVersion": 1
+  "description": "Google Drive catalog + extractor providers, plus content-neutral samples (demo catalog, GitHub Releases extractor).",
+  "minAppVersion": 1,
+  "providerOrder": ["gdrive-catalog", "google-drive", "demo-catalog", "github-releases"]
 }

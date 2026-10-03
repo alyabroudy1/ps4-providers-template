@@ -1,16 +1,16 @@
 import type { Card, Details, HomeSection, Manifest, Release } from "../../../types/ps4toolkit-provider";
 
 /**
- * Where demo/catalog.json lives. Replace YOUR_USER with your GitHub user/org (or point the user-editable
+ * Where demo/catalog.json lives. Set this to your GitHub user/org (or point the user-editable
  * `catalogUrl` setting in the app at any raw URL on an allowed host). Use the `main` branch so catalog edits go
  * live without a provider version bump; use `builds` only if you also publish demo/ there.
  */
-const DEFAULT_CATALOG_URL = "https://raw.githubusercontent.com/YOUR_USER/ps4-providers-template/main/demo/catalog.json";
+const DEFAULT_CATALOG_URL = "https://raw.githubusercontent.com/alyabroudy1/ps4-providers-template/main/demo/catalog.json";
 
 export const manifest: Manifest = {
   id: "demo-catalog",
   name: "Demo Catalog",
-  version: 1,
+  version: 2,
   apiVersion: 1,
   kinds: ["catalog"],
   allowedHosts: ["raw.githubusercontent.com", "github.com"],

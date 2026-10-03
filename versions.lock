@@ -1,10 +1,18 @@
 {
   "demo-catalog": {
+    "version": 2,
+    "sourceHash": "361d92bdcee229a851f5bb03be106b97b205027c51d8015840c0b61dfa19e00b"
+  },
+  "gdrive-catalog": {
     "version": 1,
-    "sourceHash": "333a404977cfc74cef4d1bdd83dd6af97be61bb23e3a7058473469f258123d59"
+    "sourceHash": "3501b1dc3d948e28b99af2f71eaf4df496ac75b88a9e19dcde1200677a7ad536"
   },
   "github-releases": {
     "version": 1,
     "sourceHash": "c8440c9d967a84bc201fa7138c9ab360d09a41a8cf4f5377562242487ad17aa1"
+  },
+  "google-drive": {
+    "version": 1,
+    "sourceHash": "534a699113ef5b7b31c13730a7f40acff10f30e9cba66de405618e461abc1646"
   }
 }

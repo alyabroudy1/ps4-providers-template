@@ -1,0 +1,4 @@
+{
+  "description": "Browse a catalog file you host yourself on Google Drive or in a Google Sheet (link-list JSON/CSV format). Ships no content: set the catalog URL in the provider settings.",
+  "authors": ["ps4-providers-template"]
+}

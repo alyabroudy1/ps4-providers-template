@@ -6,8 +6,9 @@ You write small TypeScript providers; CI builds them into versioned JS bundles p
 and auto-updates the providers. Fixing a broken site = edit, bump the version, push.
 
 The app ships **no repositories and no providers**. What a repo contains is the responsibility of its
-author. The two samples here are content-neutral: `demo-catalog` reads a fake homebrew-style
-`demo/catalog.json` from this repo, and `github-releases` resolves GitHub Releases links.
+author. This repo has two generic Google Drive providers (listed first: `gdrive-catalog`, `google-drive`) and
+two content-neutral samples: `demo-catalog` reads a fake homebrew-style `demo/catalog.json` from this repo, and
+`github-releases` resolves GitHub Releases links. Listing order comes from `providerOrder` in `repo.config.json`.
 
 ```
 providers/<id>/src/index.ts     one folder per provider (the folder name must equal manifest.id)
@@ -34,6 +35,54 @@ npm run build            # -> dist/*.js, dist/plugins.json, dist/repo.json
 ```
 
 Requires Node 20+.
+
+## Google Drive catalog (`gdrive-catalog`) and Drive extractor (`google-drive`)
+
+`gdrive-catalog` is a generic catalog provider with **no built-in content**. You host a catalog file yourself and
+paste its link into the provider's settings (Settings -> Extensions -> Google Drive Catalog -> `catalogUrl`;
+optional `catalogName` titles the home section). Empty `catalogUrl` = empty catalog, and opening an item asks you to
+set the URL.
+
+**Host the file on Google Drive**
+
+1. Create a `catalog.json` (or `catalog.csv`) in the format below and upload it to Drive.
+2. Share -> General access -> **Anyone with the link** (Viewer).
+3. Copy the link (`https://drive.google.com/file/d/<id>/view?usp=sharing`) into `catalogUrl`. `open?id=` and
+   `uc?id=` links work too, and so does any other https URL (fetched as-is, host must be allowed: Drive, Docs,
+   `*.googleusercontent.com`). Edits to the file show up after the 10 minute cache expires.
+
+**Or use a Google Sheet (CSV format)**: put the header `title,titleId,kind,password,part1,part2,...` in row 1, one
+item per row, then Share -> Anyone with the link and paste the sheet URL (`https://docs.google.com/spreadsheets/d/<id>/edit`;
+a `#gid=<n>` / `?gid=<n>` selects a tab, default is the first). It is fetched through `/export?format=csv`.
+
+**Catalog format** (the app's link-list import format):
+
+```json
+{ "format": "ps4toolkit-links", "version": 1, "items": [
+  { "title": "Demo Homebrew", "titleId": "DEMO00001", "kind": "game", "archivePassword": null,
+    "parts": ["https://example.com/demo.part1.rar", "https://example.com/demo.part2.rar"],
+    "notes": "Mirror 1", "coverUrl": "https://example.com/cover.png", "description": "...", "region": "EU", "sizeBytes": 123456 }
+] }
+```
+
+CSV: `title,titleId,kind,password,part1,part2,...` plus optional columns `coverUrl,description,region,sizeBytes,notes`;
+RFC 4180 quoting, empty cells ignored. `kind` is `game|update|dlc|other` (default `other`). Only `title` and at least
+one http(s) part are required; rows without them are skipped (see the provider log).
+
+**Merge rule:** items with the same `title` (case-insensitive) become one card/details, with one release per `kind`
+and one source per item (use this for several mirrors, or for a game plus its update). Part links to Drive files or
+folders are resolved by the `google-drive` extractor (install it too).
+
+**`google-drive` extractor limitations**
+
+- Files and folders must be shared as **Anyone with the link**; private ones fail with "file is not shared publicly".
+- Large files go through Google's "can't scan for viruses" confirm page; the extractor submits it for you and returns
+  the confirmed URL. The confirmed link carries a one-time `uuid`/token, so resolve and download promptly, and it may
+  need the `Cookie` header from `DirectFile.headers` (the app's downloader must send it).
+- Drive limits downloads per file per day: "download quota exceeded, try later" means wait (up to 24 h) or copy the
+  file to your own Drive.
+- Folders: only the first level is listed (sub-folders are skipped), in natural name order (`part2` before
+  `part10`); Drive's embedded folder view may show only the first ~50 entries, so split big sets across folders.
 
 ## Writing a provider (API v1)
 
@@ -109,9 +158,9 @@ CI fails if the source changed without a bump, or if `versions.lock` was not upd
 
 ## Publishing
 
-1. Push this repo to GitHub (any name; the sample default catalog URL has a `YOUR_USER` placeholder in
-   `providers/demo-catalog/src/index.ts` - set it to your user/repo, bump the version, or override the
-   `catalogUrl` setting in the app).
+1. Push this repo to GitHub as `alyabroudy1/ps4-providers-template` (if you use another user/repo, change the
+   default catalog URL in `providers/demo-catalog/src/index.ts`, bump its version, and use `--base`/`REPO_RAW_BASE`
+   accordingly; or just override the `catalogUrl` setting in the app).
 2. On every push to `main`, `.github/workflows/build.yml` runs typecheck, tests, check-versions and the build, then
    force-pushes `dist/` to the orphan `builds` branch (peaceiris/actions-gh-pages). It sets
    `REPO_RAW_BASE=https://raw.githubusercontent.com/<user>/<repo>/builds`.

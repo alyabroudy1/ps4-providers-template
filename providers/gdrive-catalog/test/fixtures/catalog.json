@@ -1,0 +1,14 @@
+{
+  "format": "ps4toolkit-links",
+  "version": 1,
+  "items": [
+    { "title": "Demo Homebrew", "titleId": "DEMO00001", "kind": "game", "coverUrl": "https://lh3.googleusercontent.com/demo-cover", "description": "A fictional demo entry.", "region": "EU", "sizeBytes": 2097152,
+      "parts": ["https://github.com/example-org/demo/releases/download/v1/demo.zip.001", "https://github.com/example-org/demo/releases/download/v1/demo.zip.002"], "archivePassword": "demo-pass", "notes": "Main mirror" },
+    { "title": "demo homebrew", "kind": "update", "parts": ["https://drive.google.com/file/d/EXAMPLEID0000000000000000000000001/view"] },
+    { "title": "Demo Homebrew", "kind": "game", "parts": ["https://example.com/mirror/demo.zip"] },
+    { "title": "Other Sample", "titleId": "DEMO00002", "parts": ["https://example.com/other.pkg"] },
+    { "titleId": "DEMO00003", "parts": ["https://example.com/no-title.pkg"] },
+    { "title": "No Parts", "parts": [] },
+    { "title": "Bad Parts", "parts": ["ftp://example.com/x"] }
+  ]
+}

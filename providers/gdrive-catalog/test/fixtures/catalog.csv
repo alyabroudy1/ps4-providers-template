@@ -1,0 +1,8 @@
+title,titleId,kind,password,part1,part2,part3,description
+Demo Homebrew,DEMO00001,game,demo-pass,https://example.com/a.part1.rar,https://example.com/a.part2.rar,,"A ""quoted"", comma-containing
+multi-line description"
+"Sample, Pack",,dlc,,https://example.com/pack.pkg,,,
+,DEMO00009,game,,https://example.com/untitled.pkg,,,
+Empty Row Below,,update,,https://example.com/u.pkg,,,
+
+Demo Homebrew,,update,,https://example.com/u2.pkg,,,

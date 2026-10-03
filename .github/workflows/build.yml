@@ -1,0 +1,50 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run check-versions
+
+      - name: Build providers, plugins.json and repo.json
+        env:
+          # Where the `builds` branch is served from; becomes the plugin urls and repo.json pluginLists.
+          REPO_RAW_BASE: https://raw.githubusercontent.com/${{ github.repository }}/builds
+          # Optional: PEM of an EC P-256 private key. When unset the repo is published unsigned.
+          PROVIDER_SIGNING_KEY: ${{ secrets.PROVIDER_SIGNING_KEY }}
+        run: npm run build
+
+      # Force-pushes dist/ as the only content of the orphan `builds` branch.
+      - name: Publish dist/ to the builds branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: builds
+          force_orphan: true
+          enable_jekyll: true
+          user_name: github-actions[bot]
+          user_email: 41898282+github-actions[bot]@users.noreply.github.com
+          commit_message: "build ${{ github.sha }}"

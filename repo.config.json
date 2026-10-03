@@ -1,0 +1,5 @@
+{
+  "name": "PS4 Toolkit demo providers",
+  "description": "Content-neutral sample providers (demo catalog + GitHub Releases extractor).",
+  "minAppVersion": 1
+}

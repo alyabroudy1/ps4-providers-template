@@ -1,0 +1,22 @@
+{
+  "name": "ps4-providers-template",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Template repository for PS4 Toolkit provider extensions (provider API v1).",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "check-versions": "node scripts/check-versions.mjs",
+    "serve": "node scripts/serve.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "cheerio": "^1.0.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.6.0",
+    "vitest": "^3.0.0"
+  },
+  "engines": { "node": ">=20" }
+}

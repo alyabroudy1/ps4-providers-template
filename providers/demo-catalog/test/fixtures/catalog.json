@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "name": "Demo homebrew catalog",
+  "items": [
+    {
+      "id": "demo-hello",
+      "title": "Demo Homebrew Hello",
+      "titleId": "DEMO00001",
+      "region": "ALL",
+      "category": "Featured",
+      "description": "A fictional demo entry used to show how a catalog provider works. Not a real application.",
+      "minFirmware": "5.05",
+      "releases": [
+        {
+          "label": "Demo Homebrew Hello 1.0.0",
+          "kind": "game",
+          "version": "1.0.0",
+          "host": "github.com",
+          "sizeBytes": 1048576,
+          "parts": [
+            "https://github.com/example-org/demo-homebrew-hello/releases/download/v1.0.0/demo-homebrew-hello-1.0.0.pkg"
+          ]
+        },
+        {
+          "label": "Demo Homebrew Hello 1.0.1 update",
+          "kind": "update",
+          "version": "1.0.1",
+          "host": "github.com",
+          "sizeBytes": 262144,
+          "parts": [
+            "https://github.com/example-org/demo-homebrew-hello/releases/download/v1.0.1/demo-homebrew-hello-update-1.0.1.pkg"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "demo-tools",
+      "title": "Demo Homebrew Tools",
+      "titleId": "DEMO00002",
+      "region": "ALL",
+      "category": "Tools",
+      "description": "A fictional multi-part demo archive (two parts) to exercise part joining and the release tag extractor.",
+      "releases": [
+        {
+          "label": "Demo Homebrew Tools 2.3.0 (split archive)",
+          "kind": "game",
+          "version": "2.3.0",
+          "host": "github.com",
+          "sizeBytes": 3145728,
+          "parts": [
+            "https://github.com/example-org/demo-homebrew-tools/releases/download/v2.3.0/demo-homebrew-tools-2.3.0.zip.001",
+            "https://github.com/example-org/demo-homebrew-tools/releases/download/v2.3.0/demo-homebrew-tools-2.3.0.zip.002"
+          ]
+        },
+        {
+          "label": "Demo Homebrew Tools 2.3.0 (release page)",
+          "kind": "other",
+          "version": "2.3.0",
+          "host": "github.com",
+          "parts": [
+            "https://github.com/example-org/demo-homebrew-tools/releases/tag/v2.3.0"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "demo-sample-dlc",
+      "title": "Demo Homebrew Sample Pack",
+      "titleId": "DEMO00003",
+      "region": "EU",
+      "category": "Tools",
+      "description": "A fictional add-on pack for the demo homebrew, showing the dlc release kind.",
+      "releases": [
+        {
+          "label": "Sample Pack 0.9.0",
+          "kind": "dlc",
+          "version": "0.9.0",
+          "host": "github.com",
+          "sizeBytes": 524288,
+          "parts": [
+            "https://github.com/example-org/demo-homebrew-samples/releases/download/v0.9.0/demo-sample-pack-0.9.0.pkg"
+          ]
+        }
+      ]
+    }
+  ]
+}

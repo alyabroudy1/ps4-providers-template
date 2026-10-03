@@ -1,0 +1,10 @@
+{
+  "demo-catalog": {
+    "version": 1,
+    "sourceHash": "333a404977cfc74cef4d1bdd83dd6af97be61bb23e3a7058473469f258123d59"
+  },
+  "github-releases": {
+    "version": 1,
+    "sourceHash": "c8440c9d967a84bc201fa7138c9ab360d09a41a8cf4f5377562242487ad17aa1"
+  }
+}

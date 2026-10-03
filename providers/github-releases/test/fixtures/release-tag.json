@@ -1,0 +1,8 @@
+{
+  "tag_name": "v2.3.0",
+  "name": "Demo Homebrew Tools 2.3.0",
+  "assets": [
+    { "name": "demo-homebrew-tools-2.3.0.zip.001", "size": 2097152, "browser_download_url": "https://github.com/example-org/demo-homebrew-tools/releases/download/v2.3.0/demo-homebrew-tools-2.3.0.zip.001" },
+    { "name": "demo-homebrew-tools-2.3.0.zip.002", "size": 1048576, "browser_download_url": "https://github.com/example-org/demo-homebrew-tools/releases/download/v2.3.0/demo-homebrew-tools-2.3.0.zip.002" }
+  ]
+}

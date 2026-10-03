@@ -1,0 +1,4 @@
+{
+  "description": "Resolves GitHub release download/tag links to direct asset URLs.",
+  "authors": ["ps4-providers-template"]
+}

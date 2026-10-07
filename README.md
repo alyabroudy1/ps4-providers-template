@@ -136,6 +136,37 @@ Full types: `types/ps4toolkit-provider.d.ts`.
 `scripts/build.mjs` runs `esbuild --bundle --format=iife --global-name=provider --target=es2020`, so each
 bundle is a classic script that assigns a global `provider`. Everything must be bundled (no imports at runtime).
 
+## Kotlin (Dex) providers
+
+Besides sandboxed JS providers, the app's **sideload build** can run providers written in Kotlin and shipped as
+`.ps4p` bundles (`runtime: "dex"` in `plugins.json`, `minAppVersion` 20). **They are not sandboxed**: Dex code runs
+with the app's full permissions (only `host.httpGet`/`httpPost` honour `allowedHosts`), so the app warns users before
+installing one. Other builds ignore them. Prefer JS unless you need Kotlin.
+
+- **API:** implement `DexProvider` (see [`kotlin/provider-api/.../DexProvider.kt`](kotlin/provider-api/src/main/kotlin/io/blueoak/ps4toolkit/provider/api/DexProvider.kt),
+  a mirror of the app repo's file; keep it in sync). Methods return **JSON strings** in the same API v1 shapes as JS
+  providers (`HomeSection[]`, `Card[]`, `Details`, `DirectFile[]`), validated by the app. Need a public no-arg constructor.
+- **compileOnly rule:** the app provides the Kotlin stdlib and the `provider-api` classes. Declare them `compileOnly`
+  and do not bundle them or any other library: `classes.dex` must contain only your own code (the sample ships a tiny
+  JSON parser/writer instead of a dependency). The `ps4p` task dexes only the module's own classes.
+- **`.ps4p` format:** a zip holding exactly `manifest.json` and `classes.dex` (no directory entries, max 8 MB).
+  `manifest.json` = the manifest fields (`id`, `name`, `version`, `apiVersion`, `kinds`, `allowedHosts`, `language`,
+  `settings`) plus `className` (your `DexProvider`) and, for extractors, `extractorPatterns`. `meta.json` next to it
+  (`description`, `authors`, ...) feeds `plugins.json` as for JS providers.
+- **Add one:** copy `kotlin/providers/kotlin-demo` to `kotlin/providers/<id>/` (folder name = manifest `id`); modules are
+  discovered automatically.
+- **Build locally:**
+
+  ```bash
+  cd kotlin && ./gradlew test ps4p     # JDK 17+ (CI uses temurin 21); writes kotlin/build/ps4p/<id>.ps4p (+ <id>.manifest.json)
+  cd .. && npm run build               # picks the bundles up into dist/ (skipped, with a note, if none were built)
+  ```
+
+  D8 (`com.android.tools:r8`, `--min-api 26 --release`) is resolved from Google's Maven; no Android SDK is needed.
+- **Versioning:** same rule as JS providers. Changing anything under `kotlin/providers/<id>/src/main` or its
+  `manifest.json` requires bumping `version` in `manifest.json`, then `npm run check-versions -- --update`.
+  CI runs `./kotlin/gradlew -p kotlin test ps4p` before `npm run build`.
+
 ## Testing
 
 `npm test` runs vitest. Tests install `testing/fakeBridge.ts`, which implements the typings with recorded

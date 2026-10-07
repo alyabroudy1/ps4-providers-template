@@ -1,0 +1,4 @@
+{
+  "description": "Kotlin (Dex) sample: browses demo/catalog.json from this repository. Runs only in the app's sideload build, with full app permissions.",
+  "authors": ["ps4-providers-template"]
+}

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Builds every provider in providers/<id>/ into dist/<id>.js and generates dist/plugins.json + dist/repo.json
-// (IMPLEMENTATION_PLAN.md section 27.4).
+// (IMPLEMENTATION_PLAN.md section 27.4). Prebuilt Kotlin (Dex) bundles from kotlin/build/ps4p/*.ps4p (gradle `ps4p`)
+// are added as runtime "dex" entries when present.
 //
 //   node scripts/build.mjs [--base <url>] [--out dist]
 //
@@ -135,6 +136,59 @@ for (const id of ids) {
   plugins.push(entry);
   console.log(`built ${id}.js  v${m.version}  ${bytes.length} bytes  sha256=${sha256.slice(0, 12)}...${signer ? "  signed" : ""}`);
 }
+
+// --- Kotlin (Dex) providers: kotlin/build/ps4p/<id>.ps4p + <id>.manifest.json (from `./gradlew ps4p`) ------------
+const ps4pDir = join(root, "kotlin", "build", "ps4p");
+const ps4pFiles = existsSync(ps4pDir) ? readdirSync(ps4pDir).filter((f) => f.endsWith(".ps4p")).sort() : [];
+if (ps4pFiles.length === 0) {
+  console.log("note: no kotlin/build/ps4p/*.ps4p found; skipping Kotlin (Dex) providers (run 'cd kotlin && ./gradlew test ps4p' first)");
+}
+for (const file of ps4pFiles) {
+  const id = file.slice(0, -".ps4p".length);
+  const manifestPath = join(ps4pDir, `${id}.manifest.json`);
+  if (!existsSync(manifestPath)) throw new Error(`kotlin/build/ps4p/${file}: missing ${id}.manifest.json (rebuild with gradle ps4p)`);
+  const m = JSON.parse(readFileSync(manifestPath, "utf8"));
+  const bytes = readFileSync(join(ps4pDir, file));
+
+  const problems = [];
+  if (m.id !== id) problems.push(`manifest.id '${m.id}' must equal the bundle name '${id}'`);
+  if (!ID_RE.test(String(m.id))) problems.push("manifest.id has invalid characters");
+  if (!Number.isInteger(m.version) || m.version < 1) problems.push("manifest.version must be an integer >= 1");
+  if (m.apiVersion !== 1) problems.push("manifest.apiVersion must be 1");
+  if (!Array.isArray(m.kinds) || m.kinds.length === 0) problems.push("manifest.kinds must be non-empty");
+  if (typeof m.className !== "string" || !m.className) problems.push("manifest.className is required");
+  if (m.kinds?.includes("extractor") && !(Array.isArray(m.extractorPatterns) && m.extractorPatterns.length > 0)) {
+    problems.push("extractor providers must declare extractorPatterns in manifest.json");
+  }
+  if (bytes.length > 8 * 1024 * 1024) problems.push("bundle is larger than 8 MB");
+  if (problems.length) throw new Error(`kotlin/providers/${id}: ${problems.join("; ")}`);
+
+  writeFileSync(join(outDir, file), bytes);
+  const meta = readJson(join(root, "kotlin", "providers", id, "meta.json"), {});
+  const sha256 = createHash("sha256").update(bytes).digest("hex");
+  const entry = {
+    id: m.id,
+    name: m.name,
+    version: m.version,
+    apiVersion: m.apiVersion,
+    runtime: "dex",
+    kinds: m.kinds,
+    url: `${base}/${file}`,
+    sha256,
+    fileSize: bytes.length,
+    status: meta.status ?? "ok",
+    minAppVersion: meta.minAppVersion ?? Math.max(config.minAppVersion ?? 1, 20),
+  };
+  if (m.language) entry.language = m.language;
+  if (m.iconUrl) entry.iconUrl = m.iconUrl;
+  if (meta.authors) entry.authors = meta.authors;
+  if (meta.description) entry.description = meta.description;
+  if (meta.changelog) entry.changelog = meta.changelog;
+  if (signer) entry.signature = signer.sign(sha256);
+  plugins.push(entry);
+  console.log(`built ${file}  v${m.version}  ${bytes.length} bytes  sha256=${sha256.slice(0, 12)}...  runtime=dex${signer ? "  signed" : ""}`);
+}
+plugins.sort((a, b) => rank(a.id) - rank(b.id) || a.id.localeCompare(b.id));
 
 const repo = {
   name: config.name ?? "Provider repository",

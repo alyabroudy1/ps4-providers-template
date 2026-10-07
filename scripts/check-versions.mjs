@@ -2,7 +2,8 @@
 // Fails when a provider's source changed without bumping manifest.version.
 //
 // Works offline against the committed versions.lock, which records {version, sourceHash} per provider as of the
-// last release. A provider's sourceHash is the sha256 over every file under providers/<id>/src (path + LF-normalised
+// last release. A provider's sourceHash is the sha256 over every file under providers/<id>/src (Kotlin: kotlin/providers/<id>/src/main
+// + manifest.json) (path + LF-normalised
 // content), so it does not depend on esbuild or line endings.
 //
 //   node scripts/check-versions.mjs            check (CI)
@@ -35,18 +36,31 @@ function walk(dir) {
     .sort();
 }
 
+/** Sources of a provider: TS = providers/<id>/src; Kotlin = kotlin/providers/<id>/src/main + manifest.json. */
 function sourceHash(id) {
-  const srcDir = join(root, "providers", id, "src");
   const h = createHash("sha256");
-  for (const f of walk(srcDir)) {
-    h.update(relative(srcDir, f).split("\\").join("/") + "\0");
+  const add = (base, f) => {
+    h.update(relative(base, f).split("\\").join("/") + "\0");
     h.update(readFileSync(f, "utf8").replace(/\r\n/g, "\n") + "\0");
+  };
+  if (kotlinIds.includes(id)) {
+    const kdir = join(root, "kotlin", "providers", id);
+    for (const f of walk(join(kdir, "src", "main"))) add(kdir, f);
+    add(kdir, join(kdir, "manifest.json"));
+  } else {
+    const srcDir = join(root, "providers", id, "src");
+    for (const f of walk(srcDir)) add(srcDir, f);
   }
   return h.digest("hex");
 }
 
-/** Reads `version: N` out of the manifest object literal in src/index.ts (no build required). */
+/** Reads the version: kotlin = manifest.json "version"; TS = `version: N` in the manifest literal of src/index.ts. */
 function manifestVersion(id) {
+  if (kotlinIds.includes(id)) {
+    const v = JSON.parse(readFileSync(join(root, "kotlin", "providers", id, "manifest.json"), "utf8")).version;
+    if (!Number.isInteger(v)) throw new Error(`kotlin/providers/${id}/manifest.json: 'version' must be an integer`);
+    return v;
+  }
   const src = readFileSync(join(root, "providers", id, "src", "index.ts"), "utf8");
   const block = /export\s+const\s+manifest\b[^=]*=\s*\{([\s\S]*?)\n\};/.exec(src);
   const m = block && /\bversion\s*:\s*(\d+)/.exec(block[1]);
@@ -54,9 +68,16 @@ function manifestVersion(id) {
   return Number(m[1]);
 }
 
-const ids = readdirSync(join(root, "providers"))
+const tsIds = readdirSync(join(root, "providers"))
   .filter((d) => existsSync(join(root, "providers", d, "src", "index.ts")))
   .sort();
+const kotlinRoot = join(root, "kotlin", "providers");
+const kotlinIds = existsSync(kotlinRoot)
+  ? readdirSync(kotlinRoot)
+      .filter((d) => existsSync(join(kotlinRoot, d, "manifest.json")) && existsSync(join(kotlinRoot, d, "src", "main")))
+      .sort()
+  : [];
+const ids = [...tsIds, ...kotlinIds].sort();
 const current = Object.fromEntries(ids.map((id) => [id, { version: manifestVersion(id), sourceHash: sourceHash(id) }]));
 
 if (update) {

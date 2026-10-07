@@ -4,3 +4,7 @@ dist/
 *.key
 .env
 coverage/
+kotlin/build
+kotlin/**/build
+kotlin/.gradle
+kotlin/.kotlin

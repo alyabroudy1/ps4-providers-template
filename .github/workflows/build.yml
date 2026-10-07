@@ -23,10 +23,25 @@ jobs:
           node-version: 22
           cache: npm
 
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: wrapper
+          build-root-directory: kotlin
+
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
       - run: npm run check-versions
+
+      # Kotlin (Dex) providers: JVM unit tests, then kotlin/build/ps4p/<id>.ps4p picked up by `npm run build`.
+      # NOTE: kotlin/gradlew must carry the executable git mode (git update-index --chmod=+x kotlin/gradlew).
+      - name: Test and package Kotlin providers
+        run: ./kotlin/gradlew -p kotlin test ps4p
 
       - name: Build providers, plugins.json and repo.json
         env:

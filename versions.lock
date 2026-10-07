@@ -14,5 +14,9 @@
   "google-drive": {
     "version": 1,
     "sourceHash": "534a699113ef5b7b31c13730a7f40acff10f30e9cba66de405618e461abc1646"
+  },
+  "kotlin-demo": {
+    "version": 1,
+    "sourceHash": "2b712fbc769a677c068a5b347c07d91fc7961a305ee5130a1e4bab2d096e35f7"
   }
 }

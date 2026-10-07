@@ -1,2 +1,8 @@
 * text=auto eol=lf
 *.png binary
+*.jar binary
+*.ps4p binary
+*.dex binary
+gradlew text eol=lf
+*.bat text eol=crlf
+*.sh text eol=lf

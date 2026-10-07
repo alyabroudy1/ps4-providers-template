@@ -1,0 +1,8 @@
+{
+  "name": "PS4 Toolkit demo providers",
+  "description": "Google Drive catalog + extractor providers, plus content-neutral samples (demo catalog, GitHub Releases extractor).",
+  "manifestVersion": 1,
+  "pluginLists": [
+    "https://raw.githubusercontent.com/alyabroudy1/ps4-providers-template/builds/plugins.json"
+  ]
+}

@@ -1,0 +1,102 @@
+[
+  {
+    "id": "gdrive-catalog",
+    "name": "Google Drive Catalog",
+    "version": 1,
+    "apiVersion": 1,
+    "runtime": "js",
+    "kinds": [
+      "catalog"
+    ],
+    "url": "https://raw.githubusercontent.com/alyabroudy1/ps4-providers-template/builds/gdrive-catalog.js",
+    "sha256": "112aebb1468b6bc5088d8ed1d92d6571825889fdc1b46ea4b9e999539b780895",
+    "fileSize": 12521,
+    "status": "ok",
+    "minAppVersion": 1,
+    "language": "en",
+    "authors": [
+      "ps4-providers-template"
+    ],
+    "description": "Browse a catalog file you host yourself on Google Drive or in a Google Sheet (link-list JSON/CSV format). Ships no content: set the catalog URL in the provider settings."
+  },
+  {
+    "id": "google-drive",
+    "name": "Google Drive",
+    "version": 1,
+    "apiVersion": 1,
+    "runtime": "js",
+    "kinds": [
+      "extractor"
+    ],
+    "url": "https://raw.githubusercontent.com/alyabroudy1/ps4-providers-template/builds/google-drive.js",
+    "sha256": "59baf327942a43dbf74e0a15c1442d139ee9b9129ad5fe4cf232b97725f65724",
+    "fileSize": 9049,
+    "status": "ok",
+    "minAppVersion": 1,
+    "language": "en",
+    "authors": [
+      "ps4-providers-template"
+    ],
+    "description": "Resolves public Google Drive file and folder links to direct downloads (handles the virus-scan confirm page)."
+  },
+  {
+    "id": "demo-catalog",
+    "name": "Demo Catalog",
+    "version": 2,
+    "apiVersion": 1,
+    "runtime": "js",
+    "kinds": [
+      "catalog"
+    ],
+    "url": "https://raw.githubusercontent.com/alyabroudy1/ps4-providers-template/builds/demo-catalog.js",
+    "sha256": "a30c52ab437d580dab433ff3e85ec0ee98b049ecebeb7cf7fa4821bef1049157",
+    "fileSize": 4267,
+    "status": "ok",
+    "minAppVersion": 1,
+    "language": "en",
+    "authors": [
+      "ps4-providers-template"
+    ],
+    "description": "Browses demo/catalog.json from this repository. Content-neutral demo homebrew entries."
+  },
+  {
+    "id": "github-releases",
+    "name": "GitHub Releases",
+    "version": 1,
+    "apiVersion": 1,
+    "runtime": "js",
+    "kinds": [
+      "extractor"
+    ],
+    "url": "https://raw.githubusercontent.com/alyabroudy1/ps4-providers-template/builds/github-releases.js",
+    "sha256": "1aad5ba08f20c6bc8613df686989b7e41689d984889d6e3649c6c0776f976623",
+    "fileSize": 3060,
+    "status": "ok",
+    "minAppVersion": 1,
+    "language": "en",
+    "authors": [
+      "ps4-providers-template"
+    ],
+    "description": "Resolves GitHub release download/tag links to direct asset URLs."
+  },
+  {
+    "id": "kotlin-demo",
+    "name": "Kotlin demo catalog",
+    "version": 1,
+    "apiVersion": 1,
+    "runtime": "dex",
+    "kinds": [
+      "catalog"
+    ],
+    "url": "https://raw.githubusercontent.com/alyabroudy1/ps4-providers-template/builds/kotlin-demo.ps4p",
+    "sha256": "eaf65089bcb50b1f27c56ad438ea72b6397742ee77fe6fe37656a029cdf3c8e4",
+    "fileSize": 9736,
+    "status": "ok",
+    "minAppVersion": 20,
+    "language": "en",
+    "authors": [
+      "ps4-providers-template"
+    ],
+    "description": "Kotlin (Dex) sample: browses demo/catalog.json from this repository. Runs only in the app's sideload build, with full app permissions."
+  }
+]

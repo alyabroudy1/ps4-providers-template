@@ -102,15 +102,15 @@
   {
     "id": "pspkg",
     "name": "PSPKG",
-    "version": 2,
+    "version": 3,
     "apiVersion": 1,
     "runtime": "js",
     "kinds": [
       "catalog"
     ],
     "url": "https://raw.githubusercontent.com/alyabroudy1/ps4-providers-template/builds/pspkg.js",
-    "sha256": "638371de7a2d197800ea7ef48f98424b44d2922320a7f674a3040253f7af5dc5",
-    "fileSize": 4477,
+    "sha256": "ae5e6aa2098b5312c4ad3123511af4a56324887817826f39617f3648c3b24fea",
+    "fileSize": 6573,
     "status": "ok",
     "minAppVersion": 1,
     "language": "en",

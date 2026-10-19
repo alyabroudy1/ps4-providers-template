@@ -3,7 +3,7 @@ var provider = (() => {
   const manifest = {
     id: "pspkg",
     name: "PSPKG",
-    version: 2,
+    version: 3,
     apiVersion: 1,
     kinds: ["catalog"],
     allowedHosts: ["pspkg.com", "*.pspkg.com"],
@@ -11,54 +11,108 @@ var provider = (() => {
   };
   const BASE = "https://pspkg.com";
 
-  /* ---- small helpers ---- */
+  /* ---------- small helpers ---------- */
   function clean(str) {
     if (str === null || str === undefined) return null;
     return String(str).replace(/\s+/g, " ").trim() || null;
   }
-  function abs(root, el, attr) {
-    return el ? el.absUrl(attr) : null;
+  function fmtDownloads(n) {
+    if (n == null) return null;
+    const v = Number(n.replace(/,/g, ""));
+    if (!Number.isFinite(v)) return n;
+    if (v >= 1_000_000) return (v / 1_000_000).toFixed(1) + "M";
+    if (v >= 1_000) return (v / 1_000).toFixed(1) + "K";
+    return String(v);
+  }
+  function regionFromPlat(plat) {
+    if (!plat) return null;
+    const m = plat.match(/\b(AR|EUR|USA|JPN)\b/);
+    return m ? m[1] : null;
   }
 
+  /* ---------- card ---------- */
   function toCard(el) {
     const titleEl = el.selectFirst(".hm-card-title");
     const img = el.selectFirst("img");
-    const badge = el.selectFirst(".hm-card-badge");
+    const badgeEl = el.selectFirst(".hm-card-badge");
+    const platEl = el.selectFirst(".hm-card-plat");
+    const dlEl = el.selectFirst('span.tr-no:has(i.fa-download)');
+    const rtEl = el.selectFirst('span.tr-no:has(i.fa-star)');
+
+    const title = clean(titleEl ? titleEl.text() : null);
+    const coverUrl = img ? img.absUrl("src") : null;
+    const plat = clean(platEl ? platEl.text() : null);
+    const downloadsRaw = clean(dlEl ? dlEl.text() : null);
+    const ratingRaw = clean(rtEl ? rtEl.text() : null);
+
+    const badges = [];
+    if (plat && plat !== "") badges.push(plat);
+    const rating = ratingRaw && ratingRaw !== "0.0" ? ratingRaw : null;
+    if (rating) badges.push("\u2605 " + rating);
+    if (downloadsRaw) badges.push(fmtDownloads(downloadsRaw) + " downloads");
+
     return {
       url: el.absUrl("href"),
-      title: clean(titleEl ? titleEl.text() : null),
-      coverUrl: img ? img.absUrl("src") : null,
+      title: title,
+      coverUrl: coverUrl,
       titleId: null,
-      region: null,
-      badges: badge ? [clean(badge.text())] : []
+      region: regionFromPlat(plat),
+      badges: badges,
     };
   }
 
-  async function getHome(page) {
-    if (page > 1) return [];
+  async function fetchHomePage() {
     const res = await http.get(BASE + "/ps4/");
+    return html.parse(res.body, res.url);
+  }
+
+  async function getHome(page) {
+    if (page === 1) {
+      const root = await fetchHomePage();
+      const sections = [];
+      for (const sec of root.select("div.hm-section")) {
+        const titleEl = sec.selectFirst("div.hm-section-title");
+        const title = clean(titleEl ? titleEl.text() : null) || "Games";
+        const cards = [];
+        for (const el of sec.select("a.hm-card")) cards.push(toCard(el));
+        if (cards.length === 0) continue;
+        sections.push({ name: title, cards: cards, hasMore: true });
+      }
+      if (sections.length === 0) {
+        // fallback: any cards anywhere on the page
+        const cards = [];
+        for (const el of root.select("a.hm-card")) cards.push(toCard(el));
+        if (cards.length > 0) sections.push({ name: "Games", cards: cards, hasMore: true });
+      }
+      return sections;
+    }
+
+    // page >= 2: paginated listing
+    const res = await http.get(BASE + "/ps4/?page=" + page);
     const root = html.parse(res.body, res.url);
     const cards = [];
     for (const el of root.select("a.hm-card")) cards.push(toCard(el));
-    return [{ name: "Games", cards: cards, hasMore: true }];
+    return cards.length > 0
+      ? [{ name: "Page " + page, cards: cards, hasMore: cards.length >= 12 }]
+      : [];
   }
 
   async function search(query, page) {
-    const res = await http.get(BASE + "/ps4/?search=" + encodeURIComponent(query));
+    const res = await http.get(BASE + "/ps4/?search=" + encodeURIComponent(query) + "&page=" + page);
     const root = html.parse(res.body, res.url);
     const cards = [];
     for (const el of root.select("a.hm-card")) cards.push(toCard(el));
     return cards;
   }
 
+  /* ---------- details ---------- */
   async function load(url) {
     const res = await http.get(url);
     const root = html.parse(res.body, res.url);
     const text = root.text();
 
-    /* title: prefer the clean info-row label, fall back to h1 */
     let title = null;
-    const titleRow = root.selectFirst('span.info-value.tr-no');
+    const titleRow = root.selectFirst("span.info-value.tr-no");
     if (titleRow) title = clean(titleRow.text());
     if (!title) {
       const h1 = root.selectFirst("h1");

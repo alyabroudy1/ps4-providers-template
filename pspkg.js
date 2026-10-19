@@ -3,7 +3,7 @@ var provider = (() => {
   const manifest = {
     id: "pspkg",
     name: "PSPKG",
-    version: 1,
+    version: 2,
     apiVersion: 1,
     kinds: ["catalog"],
     allowedHosts: ["pspkg.com", "*.pspkg.com"],

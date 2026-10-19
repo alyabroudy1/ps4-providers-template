@@ -109,8 +109,8 @@
       "catalog"
     ],
     "url": "https://raw.githubusercontent.com/alyabroudy1/ps4-providers-template/builds/pspkg.js",
-    "sha256": "e5fde3d50dbe8f079f702c3ada31c09c19190f8e8ed86d7aaefd5e8fb9c20a24",
-    "fileSize": 3251,
+    "sha256": "046f1f4076dce1e1b29157bbaaf458d5af1df0f9560368fe7fdb90c20a28352b",
+    "fileSize": 4477,
     "status": "ok",
     "minAppVersion": 1,
     "language": "en",

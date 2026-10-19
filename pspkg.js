@@ -11,17 +11,26 @@ var provider = (() => {
   };
   const BASE = "https://pspkg.com";
 
+  /* ---- small helpers ---- */
+  function clean(str) {
+    if (str === null || str === undefined) return null;
+    return String(str).replace(/\s+/g, " ").trim() || null;
+  }
+  function abs(root, el, attr) {
+    return el ? el.absUrl(attr) : null;
+  }
+
   function toCard(el) {
     const titleEl = el.selectFirst(".hm-card-title");
     const img = el.selectFirst("img");
     const badge = el.selectFirst(".hm-card-badge");
     return {
       url: el.absUrl("href"),
-      title: titleEl ? titleEl.text() : null,
+      title: clean(titleEl ? titleEl.text() : null),
       coverUrl: img ? img.absUrl("src") : null,
       titleId: null,
       region: null,
-      badges: badge ? [badge.text()] : []
+      badges: badge ? [clean(badge.text())] : []
     };
   }
 
@@ -47,11 +56,24 @@ var provider = (() => {
     const root = html.parse(res.body, res.url);
     const text = root.text();
 
-    const titleEl = root.selectFirst("h1");
-    const title = titleEl ? titleEl.text() : null;
+    /* title: prefer the clean info-row label, fall back to h1 */
+    let title = null;
+    const titleRow = root.selectFirst('span.info-value.tr-no');
+    if (titleRow) title = clean(titleRow.text());
+    if (!title) {
+      const h1 = root.selectFirst("h1");
+      title = h1 ? clean(h1.text().replace(/\s*\(\d{4}\).*$/, "")) : null;
+    }
 
-    const coverImg = root.selectFirst("img[src*='/gallery/']");
+    const coverImg = root.selectFirst("img[src*='/ps4/image/']:not([src*='/gallery/'])");
     const coverUrl = coverImg ? coverImg.absUrl("src") : null;
+
+    const gallery = root.select("img[src*='/gallery/']");
+    const screenshots = [];
+    for (const el of gallery) {
+      const s = el.absUrl("src");
+      if (s && !screenshots.includes(s)) screenshots.push(s);
+    }
 
     const mId = text.match(/CUSA\d{5}/);
     const titleId = mId ? mId[0] : null;
@@ -60,14 +82,25 @@ var provider = (() => {
     const region = mEd ? mEd[1] : null;
     const version = mEd ? mEd[2] : null;
 
-    const mFw = text.match(/Firmware[^\d]{0,40}(\d{2}\.\d{2})/i);
+    const mFw = text.match(/إصدار\s*النظام[^\d]{0,60}(\d{2}\.\d{2})/);
     const minFirmware = mFw ? mFw[1] : null;
 
     const mSize = text.match(/(\d+)\s*GB/i);
     const sizeBytes = mSize ? parseInt(mSize[1], 10) * 1024 * 1024 * 1024 : null;
 
-    const descEl = root.selectFirst(".comment-content-wrapper");
-    const description = descEl ? descEl.text() : null;
+    let description = null;
+    const descDiv = root.selectFirst("div.description-content");
+    if (descDiv) {
+      description = clean(descDiv.text());
+      if (description && description.length > 4000) description = description.slice(0, 4000) + "\u2026";
+    }
+
+    const trailerEl = root.selectFirst("iframe[src*='youtube.com/embed/']");
+    let trailerUrl = null;
+    if (trailerEl) {
+      const m = trailerEl.attr("src").match(/youtube\.com\/embed\/([A-Za-z0-9_-]+)/);
+      if (m) trailerUrl = "https://www.youtube.com/watch?v=" + m[1];
+    }
 
     const dlLink = root.selectFirst("a[href*='/download-']");
     const downloadUrl = dlLink ? dlLink.absUrl("href") : null;
@@ -100,8 +133,8 @@ var provider = (() => {
       region: region,
       minFirmware: minFirmware,
       sizeBytes: sizeBytes,
-      screenshots: [],
-      trailerUrl: null,
+      screenshots: screenshots,
+      trailerUrl: trailerUrl,
       releases: releases
     };
   }

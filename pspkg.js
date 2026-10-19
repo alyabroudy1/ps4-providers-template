@@ -3,13 +3,14 @@ var provider = (() => {
   const manifest = {
     id: "pspkg",
     name: "PSPKG",
-    version: 3,
+    version: 4,
     apiVersion: 1,
-    kinds: ["catalog"],
+    kinds: ["catalog", "extractor"],
     allowedHosts: ["pspkg.com", "*.pspkg.com"],
     language: "en"
   };
   const BASE = "https://pspkg.com";
+  const extractorPatterns = ["https?://(?:www\\.)?pspkg\\.com/download-[^\"'\\s]+"];
 
   /* ---------- small helpers ---------- */
   function clean(str) {
@@ -193,5 +194,60 @@ var provider = (() => {
     };
   }
 
-  return { manifest: manifest, getHome: getHome, search: search, load: load };
+  /* ---------- extractor ---------- */
+  function findLinks(root) {
+    const list = [];
+    for (const a of root.select("a[href*='.pkg'], a.download-btn, a[href*='/download/']")) {
+      const href = a.absUrl("href");
+      if (href && !list.some(item => item.url === href)) {
+        list.push({ url: href, fileName: clean(a.text()) || null });
+      }
+    }
+    return list;
+  }
+
+  async function extract(url) {
+    const renderRes = await web.render(url, {
+      waitForSelector: "input[name='cf-turnstile-response']",
+      timeoutMs: 60000
+    });
+    const root = html.parse(renderRes.html, renderRes.url);
+
+    const directLinks = findLinks(root);
+    if (directLinks.length > 0) return directLinks;
+
+    const form = root.selectFirst("form:has(input[name='cf-turnstile-response'])") || root.selectFirst("form");
+    const tokenInput = root.selectFirst("input[name='cf-turnstile-response']") ||
+                       root.selectFirst("[name='cf-turnstile-response']");
+    const token = tokenInput ? tokenInput.attr("value") : null;
+
+    if (form && token) {
+      const action = form.attr("action") ? form.absUrl("action") : url;
+      const formFields = {};
+      for (const input of form.select("input[name]")) {
+        const name = input.attr("name");
+        formFields[name] = input.attr("value") || "";
+      }
+      formFields["cf-turnstile-response"] = token;
+
+      const postRes = await http.post(action, {
+        form: formFields,
+        headers: { "Referer": url }
+      });
+
+      const postRoot = html.parse(postRes.body, postRes.url);
+      const links = findLinks(postRoot);
+      if (links.length > 0) return links;
+
+      try {
+        const data = JSON.parse(postRes.body);
+        if (data.url) return [{ url: data.url, fileName: data.filename || null }];
+        if (Array.isArray(data.links)) return data.links.map(l => typeof l === 'string' ? { url: l } : l);
+      } catch (_) {}
+    }
+
+    return [{ url: url }];
+  }
+
+  return { manifest, getHome, search, load, extract, extractorPatterns };
 })();
